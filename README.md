@@ -24,7 +24,8 @@ pip install -r requirements.txt
 ``` 
 python main.py <Source Directory Path> <Destination Directory Path> <Synchronization interval in Seconds> <Log file Location>
 ```
+
 ## ⚠️ WARNING ⚠️
 - **Avoid setting the interval too low**, as it may cause instability.
 - **Recommendation**: Set the interval to **at least 5 seconds** to prevent issues.
-- **Compatibility**: Not fully compatible with Windows 
+- **Windows Compatibility**: Not fully compatible with Windows 

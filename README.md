@@ -27,14 +27,4 @@ python main.py <Source Directory Path> <Destination Directory Path> <Synchroniza
 ## ⚠️ WARNING ⚠️
 - **Avoid setting the interval too low**, as it may cause instability.
 - **Recommendation**: Set the interval to **at least 5 seconds** to prevent issues.
-
-
-
-## To Do
-- Default log file
-- Windows compatibility 
-- Improve changes filter 
-- Reduce the number of os.join and os.path.normpath
-
-
-
+- **Compatibility**: Not fully compatible with Windows 

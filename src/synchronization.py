@@ -1,5 +1,4 @@
 import os
-import sys
 import shutil
 import logging
 from typing import List
@@ -23,7 +22,7 @@ def copy_file(source_path: str, replica_path: str) -> None:
 
     else:
         shutil.copy2(src=source_path, dst=replica_path) 
-        logging.info(f"[COPIED] Folder: {source_path} -> {replica_path}")
+        logging.info(f"[COPIED] Directory: {source_path} -> {replica_path}")
 
 
 def delete_extra_files(replica_path: str) -> None:
@@ -33,13 +32,13 @@ def delete_extra_files(replica_path: str) -> None:
 
     elif os.path.isdir(replica_path):
         shutil.rmtree(path=replica_path)
-        logging.info(f"[DELETED] Folder: {replica_path}")
+        logging.info(f"[DELETED] Directory: {replica_path}")
 
 
 def duplicate_source(source_directory_path:str, replica_directory_path:str) -> None:
     if not os.path.exists(replica_directory_path):
         os.makedirs(replica_directory_path)
-        logging.info(f"[CREATED] Folder: {replica_directory_path}")
+        logging.info(f"[CREATED] Directory: {replica_directory_path}")
 
 
     def copy_item(item_path: str, base_source: str, base_replica: str) -> None:
@@ -49,7 +48,7 @@ def duplicate_source(source_directory_path:str, replica_directory_path:str) -> N
         if os.path.isdir(item_path):
             if not os.path.exists(target_path):
                 os.makedirs(target_path)
-                logging.info(f"[CREATED] Folder: {target_path}")
+                logging.info(f"[CREATED] Directory: {target_path}")
 
         else:
             shutil.copy2(item_path, target_path)
@@ -92,7 +91,7 @@ def update_replica_directory(source_directory_path: str, replica_directory_path:
                 
                 if not os.path.exists(replica_dir):
                     os.makedirs(replica_dir)
-                    logging.info(f"[CREATED] folder: {replica_dir}")
+                    logging.info(f"[CREATED] directory: {replica_dir}")
 
                 if os.stat(source_dir).st_mtime > os.stat(replica_dir).st_mtime:
                     futures.append(executor.submit(copy_file, source_dir, replica_dir))
@@ -130,10 +129,10 @@ def synchronize(source_directory_path:str, replica_directory_path:str, changes:l
                     logging.info(f"[CREATED] File: {dst_path}")
                 else:
                     shutil.copytree(change['path'], dst_path)
-                    logging.info(f"[CREATED] Folder: {dst_path}")
+                    logging.info(f"[CREATED] Directory: {dst_path}")
 
             except Exception as e:
-                logging.error(f"[ERROR] Creating {'file' if os.path.isfile(change['path']) else 'folder'}. Error: {e}")
+                logging.error(f"[ERROR] Creating {'file' if os.path.isfile(change['path']) else 'directory'}. Error: {e}")
                 update_replica_directory(source_directory_path, replica_directory_path)
                 logging.info("[FIXED] Error fixed")
 
@@ -145,22 +144,22 @@ def synchronize(source_directory_path:str, replica_directory_path:str, changes:l
                     logging.info(f"[DELETED] File: {os.path.normpath(dst_path)}")
                 else:
                     shutil.rmtree(dst_path)
-                    logging.info(f"[DELETED] Folder: {os.path.normpath(dst_path)}")
+                    logging.info(f"[DELETED] Directory: {os.path.normpath(dst_path)}")
             except Exception as e:
-                logging.error(f"[ERROR] Deleting {'file' if change['is_file'] else 'folder'}. Error: {e}")
+                logging.error(f"[ERROR] Deleting {'file' if change['is_file'] else 'directory'}. Error: {e}")
                 update_replica_directory(source_directory_path, replica_directory_path)
                 logging.info("[FIXED] Error fixed")
 
 
         elif change['type'] == 'renamed':
             try:
+                relative_src_path = os.path.relpath(change['path'], source_directory_path)
+                relative_dest_path = os.path.relpath(change['new_path'], source_directory_path)
+
+                old_name_path = os.path.join(replica_directory_path, relative_src_path)
+                new_name_path = os.path.join(replica_directory_path, relative_dest_path)
+
                 if change['is_file']:
-                    relative_src_path = os.path.relpath(change['path'], source_directory_path)
-                    relative_dest_path = os.path.relpath(change['new_path'], source_directory_path)
-
-                    old_name_path = os.path.join(replica_directory_path, relative_src_path)
-                    new_name_path = os.path.join(replica_directory_path, relative_dest_path)
-
                     if os.path.exists(old_name_path):
                         os.rename(old_name_path, new_name_path)
                         logging.info(f"[RENAMED] File: {old_name_path} -> {new_name_path}")
@@ -170,10 +169,10 @@ def synchronize(source_directory_path:str, replica_directory_path:str, changes:l
 
                 else:
                     os.rename(dst_path, change['path'])
-                    logging.info(f"[RENAMED] Folder: {os.path.normpath(dst_path)} -> {os.path.normpath(change['path'])}")
+                    logging.info(f"[RENAMED] Directory: {os.path.normpath(old_name_path)} -> {os.path.normpath(new_name_path)}")
 
             except Exception as e:
-                logging.error(f"[ERROR] Renaming {'file' if change['is_file'] else 'folder'}. Error: {e}")
+                logging.error(f"[ERROR] Renaming {'file' if change['is_file'] else 'directory'}. Error: {e}")
                 update_replica_directory(source_directory_path, replica_directory_path)
                 logging.info("[FIXED] Error fixed")
 
@@ -190,10 +189,10 @@ def synchronize(source_directory_path:str, replica_directory_path:str, changes:l
 
                 else:
                     shutil.move(source_path, destination_path)
-                    logging.info(f"[MOVED] Folder: {source_path} -> {destination_path}")
+                    logging.info(f"[MOVED] Directory: {source_path} -> {destination_path}")
 
             except Exception as e:
-                logging.error(f"[ERROR] Moving {'file' if change['is_file'] else 'folder'}. Error: {e}")
+                logging.error(f"[ERROR] Moving {'file' if change['is_file'] else 'directory'}. Error: {e}")
                 update_replica_directory(source_directory_path, replica_directory_path)
                 logging.info("[FIXED] Error fixed")
 

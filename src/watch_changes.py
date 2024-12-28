@@ -39,7 +39,7 @@ class MyEventHandler(FileSystemEventHandler):
         # Rename #
         if src_parent == dest_parent:
             if event.is_directory:
-                self._add_event("renamed", event, is_file=False)
+                self._add_event("renamed", event, new_path=event.dest_path, is_file=False)
 
             else:
                 self._add_event("renamed", event, new_path=event.dest_path,is_file=True)
@@ -86,7 +86,7 @@ def directory_monitoring(path:str, event_queue:Queue, stop_event) -> None:
 
 
 
-class FolderMonitor:
+class DirectoryMonitor:
     def __init__(self, path: str):
         self.path = path
         self.event_queue = Queue()

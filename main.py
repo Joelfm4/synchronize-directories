@@ -1,6 +1,6 @@
-from typing import Dict, Union
+from typing import Dict 
 from src.input_validation import validation
-from src.watch_changes import FolderMonitor
+from src.watch_changes import DirectoryMonitor 
 from src.synchronization import *
 import logging
 import time
@@ -33,6 +33,7 @@ def filter_changes(changes: List[Dict]) -> List[Dict]:
     for change in changes:
         if change['type'] in ['created', 'modified'] and os.path.basename(change['path']).startswith('.'):
             continue
+
         elif change['type'] == 'renamed' and os.path.basename(change['path']).startswith('.'):
             edited_change = {
                 'type':'modified',
@@ -41,7 +42,7 @@ def filter_changes(changes: List[Dict]) -> List[Dict]:
                 'is_file': change['is_file'],
             }
             tmp.append(edited_change) 
-    
+
         else:
             tmp.append(change)
 
@@ -59,7 +60,7 @@ def main() -> None:
             update_replica_directory(source_directory_path, replica_directory_path)
 
 
-    directory_monitor = FolderMonitor(source_directory_path)
+    directory_monitor = DirectoryMonitor(source_directory_path)
     directory_monitor.start()
 
     try:
@@ -74,6 +75,7 @@ def main() -> None:
 
     except KeyboardInterrupt:
         directory_monitor.stop()
+        print()
         print("Running file integrity checks")
         update_replica_directory(source_directory_path, replica_directory_path)
         print("All integrity checks completed")

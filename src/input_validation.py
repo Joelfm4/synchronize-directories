@@ -10,6 +10,7 @@ def show_error_text():
     print("  2. Replica Folder Path - Path to the destination folder.")
     print("  3. Synchronization interval - Time interval (in seconds) for synchronization.")
     print("  4. Log File Location - Path to the log file. \n")
+    print("     (Enter 0 if you don't have a log file and a default 'app.log' will be created)\n")
 
 
 def valid_path(path:str) -> bool:
@@ -47,7 +48,10 @@ def input_validation() -> bool:
             errors.append(f"Error: The Sync Interval '{sys.argv[3]}' is invalid. It should be an integer.")
 
         if not os.path.isfile(sys.argv[4]) or not sys.argv[4].endswith('.log'):
-            errors.append(f"Error: The Log File Path '{sys.argv[4]}' is invalid or not a .log file.")
+            if sys.argv[4] == '0':
+                open("app.log", "w").close()
+            else:
+                errors.append(f"Error: The Log File Path '{sys.argv[4]}' is invalid or not a .log file.")
 
     if errors:
         for error in errors:
@@ -59,7 +63,8 @@ def input_validation() -> bool:
 
 def validation() -> tuple:
     if input_validation():
-        return sys.argv[1], sys.argv[2], int(sys.argv[3]), sys.argv[4]
+        log_file = "app.log" if sys.argv[4] == "0" else sys.argv[4]
+        return sys.argv[1], sys.argv[2], int(sys.argv[3]), log_file
     else:
         sys.exit(1)
 
